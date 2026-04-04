@@ -1,0 +1,11 @@
+venv/
+.pylintrc
+__pycache__/
+
+.idea
+.env
+.django.log
+.security.log
+
+media/
+debug.log
