@@ -7,13 +7,13 @@ from django.db.models import Q
 
 
 class IndexView(TemplateView):
-    template_name = 'main/index.html'
+    template_name = 'main/base.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categories'] = Category.objects.all()
         context['current_category'] = None
-        return
+        return context
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -36,7 +36,7 @@ class CatalogView(TemplateView):
         'color': lambda queryset, value: queryset.filter(color__iexact=value),
         'min_price': lambda queryset, value: queryset.filter(price__gt=value),
         'max_price': lambda queryset, value: queryset.filter(price__lt=value),
-        'size': lambda queryset, value: queryset.filter(product_size__size_name=value),
+        'size': lambda queryset, value: queryset.filter(product_sizes__size_name=value),
     }
 
     def get_context_data(self, **kwargs):
@@ -50,7 +50,7 @@ class CatalogView(TemplateView):
             current_category = get_object_or_404(Category, slug=category_slug)
             products = products.filter(category=current_category)
 
-        query = self.request.get('q')
+        query = self.request.GET.get('q')
 
         if query:
             products = products.filter(
@@ -104,6 +104,7 @@ class CatalogView(TemplateView):
             return TemplateResponse(request, template, context)
         return TemplateResponse(request, self.template_name, context)
 
+
 class ProductDetailView(DetailView):
     model = Product
     template_name = 'main/base.html'
@@ -124,4 +125,4 @@ class ProductDetailView(DetailView):
         context = self.get_context_data(**kwargs)
         if request.headers.get('HX-Request'):
             return TemplateResponse(request, 'main/product_detail.html', context)
-        raise TemplateResponse(request, self.template_name, context)
+        return TemplateResponse(request, self.template_name, context)
